@@ -6,6 +6,10 @@ const jwt = require('jsonwebtoken')
 const keys = require('../../config/keys')
 const passport = require('passport')
 
+// Load Input Validation
+const validateRegisterInput = require('../../validation/register')
+const validateLoginInput = require('../../validation/login')
+
 // Load user model
 const User = require('../../models/User')
 
@@ -20,13 +24,21 @@ router.get('/test', (req, res) => res.json({
 // @desc   Register user
 // @access Public
 router.post('/register', (req, res) => {
+  const {
+    errors,
+    isValid
+  } = validateRegisterInput(req.body)
+
+  if (!isValid) {
+    return res.status(400).json(errors)
+  }
+
   User.findOne({
     email: req.body.email
   }).then(user => {
     if (user) {
-      return res.status(400).json({
-        email: 'Email already exists'
-      })
+      errors.email = 'Email already exists.'
+      return res.status(400).json(errors)
     } else {
       const avatar = gravatar.url(req.body.email, {
         s: '200', // size
@@ -43,7 +55,9 @@ router.post('/register', (req, res) => {
 
       bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(newUser.password, salt, (err, hash) => {
-          if (err) throw err
+          if (err) {
+            throw err
+          }
 
           newUser.password = hash
           newUser
@@ -61,6 +75,15 @@ router.post('/register', (req, res) => {
 // @access Public
 router.post('/login', (req, res) => {
   const {
+    errors,
+    isValid
+  } = validateLoginInput(req.body)
+
+  if (!isValid) {
+    return res.status(400).json(errors)
+  }
+
+  const {
     email,
     password
   } = req.body
@@ -70,9 +93,8 @@ router.post('/login', (req, res) => {
     email
   }).then(user => {
     if (!user) {
-      res.status(404).json({
-        email: 'User not found'
-      })
+      errors.email = 'User not found.'
+      res.status(404).json(errors)
     }
 
     // Check password
@@ -101,9 +123,8 @@ router.post('/login', (req, res) => {
             }
           )
         } else {
-          return res.status(400).json({
-            password: 'Password incorrect'
-          })
+          errors.password = 'Password incorrect.'
+          return res.status(400).json(errors)
         }
       })
   })
