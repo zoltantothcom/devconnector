@@ -252,7 +252,7 @@ router.post(
     })
   })
 
-// @route  POST api/profile/experience/:exp_id
+// @route  DELETE api/profile/experience/:exp_id
 // @desc   Delete experience from profile
 // @access Private
 router.delete(
@@ -272,6 +272,33 @@ router.delete(
 
         // Splice out of array
         profile.experience.splice(removeIndex, 1)
+
+        // Save
+        profile.save().then(profile => res.json(profile))
+      })
+      .catch(err => res.status(404).json(err))
+  })
+
+// @route  DELETE api/profile/education/:edu_id
+// @desc   Delete education from profile
+// @access Private
+router.delete(
+  '/education/:edu_id',
+  passport.authenticate('jwt', {
+    session: false
+  }),
+  (req, res) => {
+    Profile.findOne({
+        user: req.user.id
+      }).then(profile => {
+        // Get remove index
+        const removeIndex =
+          profile.education
+          .map(item => item.id)
+          .indexOf(req.params.edu_id)
+
+        // Splice out of array
+        profile.education.splice(removeIndex, 1)
 
         // Save
         profile.save().then(profile => res.json(profile))
