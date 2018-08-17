@@ -10,15 +10,6 @@ const posts = require('./routes/api/posts');
 
 const app = express();
 
-// Serve static assets if in PROD
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'));
-
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
-  });
-}
-
 // Body parser middleware
 app.use(
   bodyParser.urlencoded({
@@ -51,6 +42,15 @@ require('./config/passport.js')(passport);
 app.use('/api/users', users);
 app.use('/api/profile', profile);
 app.use('/api/posts', posts);
+
+// Serve static assets if in PROD
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+  });
+}
 
 const port = process.env.PORT || 5000;
 
