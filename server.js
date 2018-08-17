@@ -8,6 +8,8 @@ const users = require('./routes/api/users');
 const profile = require('./routes/api/profile');
 const posts = require('./routes/api/posts');
 
+const app = express();
+
 // Serve static assets if in PROD
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static('client/build'));
@@ -16,8 +18,6 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
   });
 }
-
-const app = express();
 
 // Body parser middleware
 app.use(
